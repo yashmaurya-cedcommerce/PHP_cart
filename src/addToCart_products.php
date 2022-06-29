@@ -2,6 +2,11 @@
 session_start();
 if(!isset($_SESSION['cart']))
 $_SESSION['cart']=array();
+
+
+include 'config.php'; 
+
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -39,14 +44,14 @@ $_SESSION['cart']=array();
 </head>
 <body>
     <?php include 'products_header.php'; ?>
-    <?php include 'config.php'; ?>
+    
 
 	<div id="main">
 		<div id="products">
 		<?php foreach($products as $key => $value)
             {
 
-					$txt="<div id='product-'".$value['id'] ." class='product'>";
+					$txt="<div id='".$value['id']."' class='product'>";
                     $txt = $txt."<img src =".$value['image'].">";
                     $txt = $txt."<h3 class='title'><a href='#'>Product ". $value['id']."</a></h3>";
                     $txt = $txt."<span>Price: $".$value['price']."</span>";
@@ -57,25 +62,50 @@ $_SESSION['cart']=array();
 			$cart_txt='';
 
 
-			foreach($products as $key => $value)
-			{
-				if($cart_prod_id == $value['id'])
-				{
-					$new_prod = array($value['id'], $value['name'], $value['price'], $value['quantity']);
-					array_push($_SESSION['cart'], $new_prod);
-					print_arr($_SESSION['cart']);
-				}
 
+	if(isset($_GET['prod_id']))
+	{
+		
+		foreach($products as $key => $value)
+		{
+			if($cart_prod_id == $value['id'])
+			{
+				$flag=0;
+				foreach($_SESSION['cart'] as $key_cart=>&$value_cart)
+				{
+					if($value_cart['id'] == $cart_prod_id)
+					{
+						$flag=1;
+						$value_cart['quant']++;
+					}
+					// $new_prod = array($value['id'], $value['name'], $value['price'], $value['quantity']);
+					// array_push($_SESSION['cart'], $new_prod);
+					// print_arr($_SESSION['cart']);
+				}
+				if($flag==0)
+				{
+					$value['quant']++;
+					array_push($_SESSION['cart'], $value);	
+				}
 			}
+
+		}
+		// echo "<pre>";
+		// var_dump($_SESSION['cart']);
+		// echo "</pre>";
+		print_arr();
+	}
+
+			
 			// print_r($_SESSION['cart']);
-			function print_arr($print_cart)
+			function print_arr()
 			{
 				// print_r('Hello');
-				$cart_txt="<table  class='cart_table'><tr><th>Product ID</th><th>Product Name</th><th>Product Price</th></tr>";
-				foreach($print_cart as $cart_products)
+				$cart_txt="<table  class='cart_table'><tr><th>Product ID</th><th>Product Name</th><th>Product Price</th><th>Product Quantity</th></tr>";
+				foreach($_SESSION['cart'] as $key=>$value)
 				{
 					// print_r($cart_products);
-				$cart_txt .= "<tr><td>".$cart_products[0]."</td><td>".$cart_products[1]."</td><td>".$cart_products[2]."</td></tr>";
+				$cart_txt .= "<tr><td>".$value['id']."</td><td>".$value['name']."</td><td>".$value['price']."</td><td>".$value['quant']."</td></tr>";
 				}
 				$cart_txt .= "</table>";
 				echo $cart_txt;
